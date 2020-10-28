@@ -7,6 +7,7 @@
 package com.mx.andrea.ProductoAPI.service;
 
 import java.util.List;
+import java.util.Optional;
 import com.mx.andrea.ProductoAPI.model.Producto;
 
 /**
@@ -27,7 +28,7 @@ public interface ProductoService {
 	 * @param producto
 	 * @return
 	 */
-	void save(Producto producto);
+	Producto save(Producto producto);
 
 	/**
 	 * TODO [Agregar documentacion al método]
@@ -51,5 +52,9 @@ public interface ProductoService {
 	 * @return
 	 */
 	List<Producto> getAllProducts();
+
+	void updateProduct();
+
+	Optional<Producto> getProductById(String id);
 
 }

@@ -7,13 +7,17 @@
 package com.mx.andrea.ProductoAPI.api;
 
 import java.util.List;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import com.mx.andrea.ProductoAPI.model.Producto;
@@ -39,14 +43,21 @@ public class ProductoAPI {
 	 * @param producto
 	 */
 	@PostMapping("/registrarProducto")
-	public void save(@RequestBody Producto producto) {
+	public ResponseEntity<Producto> save(@RequestBody Producto producto) {
 		final long start = System.nanoTime();
 		logger.info("ProductoAPI: inicia save");
-		productoService.save(producto);
-		final long end = System.nanoTime();
-		logger.info("time " + (end - start) / 1000000 + "ms");
-		logger.info("time " + (end - start) / 1000000000 + "s");
-		logger.info("ProductoAPI: termina save");
+		try {
+			Producto newProducto = productoService.save(producto);
+			return new ResponseEntity<>(newProducto, HttpStatus.CREATED);
+		} catch(Exception ex) {
+			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+		} finally {
+			final long end = System.nanoTime();
+			logger.info("time " + (end - start) / 1000000 + "ms");
+			logger.info("time " + (end - start) / 1000000000 + "s");
+			logger.info("ProductoAPI: termina save");
+		}
+
 	}
 
 	/**
@@ -84,15 +95,58 @@ public class ProductoAPI {
 		return product;
 	}
 
+	@GetMapping("/obtieneProducto/{id}")
+	public ResponseEntity<Producto> obtieneProductoById(@PathVariable String id) {
+		final long start = System.nanoTime();
+		logger.info("ProductoAPI: inicia obtieneProductoById");
+		Optional<Producto> product = productoService.getProductById(id);
+		if (product.isPresent()) {
+			final long end = System.nanoTime();
+			logger.info("time " + (end - start) / 1000000 + "ms");
+			logger.info("time " + (end - start) / 1000000000 + "s");
+			logger.info("ProductoAPI: termina obtieneProductoById");
+			return new ResponseEntity<>(product.get(), HttpStatus.OK);
+		} else {
+			final long end = System.nanoTime();
+			logger.info("time " + (end - start) / 1000000 + "ms");
+			logger.info("time " + (end - start) / 1000000000 + "s");
+			logger.info("ProductoAPI: termina obtieneProductoById");
+			return new ResponseEntity<>(null, HttpStatus.OK);// product.get() no se puede trairia
+																												// error
+		}
+	}
+
 	@DeleteMapping("/eliminaProducto/{id}")
 	public void deleteProduct(@PathVariable String id) {
 		final long start = System.nanoTime();
 		logger.info("ProductoAPI: inicia deleteProduct");
-		productoService.delete(id);
-		final long end = System.nanoTime();
-		logger.info("time " + (end - start) / 1000000 + "ms");
-		logger.info("time " + (end - start) / 1000000000 + "s");
-		logger.info("ProductoAPI: termina deleteProduct");
+		Optional<Producto> product = productoService.getProductById(id);
+		if (product.isPresent()) {
+			productoService.delete(id);
+			final long end = System.nanoTime();
+			logger.info("time " + (end - start) / 1000000 + "ms");
+			logger.info("time " + (end - start) / 1000000000 + "s");
+			logger.info("ProductoAPI: termina deleteProduct");
+		}
+
+	}
+
+	/**
+	 * PUT -> Cambia todo el objeto PAT -> Cambia un atributo
+	 * @author andy lupy29@hotmail.com
+	 */
+	@PutMapping("/actualizaProducto/{id}")
+	public void updateProduct(@PathVariable String id, @RequestBody Producto newProducto) {
+		final long start = System.nanoTime();
+		logger.info("ProductoAPI: inicia updateProduct");
+		Optional<Producto> product = productoService.getProductById(id);
+		if (product.isPresent()) {
+			productoService.save(newProducto);
+			final long end = System.nanoTime();
+			logger.info("time " + (end - start) / 1000000 + "ms");
+			logger.info("time " + (end - start) / 1000000000 + "s");
+			logger.info("ProductoAPI: finaliza updateProduct");
+		}
 	}
 
 }

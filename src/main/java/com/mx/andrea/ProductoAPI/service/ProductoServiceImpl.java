@@ -7,6 +7,7 @@
 package com.mx.andrea.ProductoAPI.service;
 
 import java.util.List;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,10 +30,11 @@ public class ProductoServiceImpl implements ProductoService {
 	private ProductoRepository productoRepository;
 
 	@Override
-	public void save(Producto producto) {
+	public Producto save(Producto producto) {
 		logger.info("ProductoServiceImpl: inicia save");
-		productoRepository.save(producto);
+		Producto newProducto = productoRepository.save(producto);
 		logger.info("ProductoServiceImpl: termina save");
+		return newProducto;
 	}
 
 	@Override
@@ -59,4 +61,18 @@ public class ProductoServiceImpl implements ProductoService {
 		return productos;
 	}
 
+	@Override
+	public Optional<Producto> getProductById(String id) {
+		logger.info("ProductoServiceImpl: inicia getAllProduct");
+		Optional<Producto> producto = productoRepository.findById(id);
+		logger.info("ProductoServiceImpl: termina getAllProduct");
+		return producto;
+	}
+
+	@Override
+	public void updateProduct() {
+		logger.info("ProductoServiceImpl: inicia updateProduct");
+		productoRepository.updateProduct();
+		logger.info("ProductoServiceImpl: termina updateProduct");
+	}
 }
