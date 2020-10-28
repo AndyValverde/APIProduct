@@ -1,14 +1,8 @@
 /**
- * ProductoServiceImpl.java
- * Fecha de creación: 22 oct. 2020, 17:13:11
- *
- * Copyright (c) 2020 andy 
- * Todos los derechos reservados.
- *
- * Este software es información confidencial, propiedad de
- * andy. Esta información confidencial
- * no deberá ser divulgada y solo se podrá utilizar de acuerdo
- * a los términos que determine la propia empresa.
+ * ProductoServiceImpl.java Fecha de creación: 22 oct. 2020, 17:13:11 Copyright (c) 2020 andy
+ * Todos los derechos reservados. Este software es información confidencial, propiedad de andy.
+ * Esta información confidencial no deberá ser divulgada y solo se podrá utilizar de acuerdo a
+ * los términos que determine la propia empresa.
  */
 package com.mx.andrea.ProductoAPI.service;
 
@@ -24,45 +18,45 @@ import com.mx.andrea.ProductoAPI.repository.ProductoRepository;
  * TODO [Agregar documentacion de la clase]
  * @author andy lupy29@hotmail.com
  * @version 1.0
- * @since 
+ * @since
  */
 @Service
-public class ProductoServiceImpl implements ProductoService{
+public class ProductoServiceImpl implements ProductoService {
+
 	private static final Logger logger = LoggerFactory.getLogger(ProductoServiceImpl.class);
-	
+
 	@Autowired
-	 private ProductoRepository productoRepository;
+	private ProductoRepository productoRepository;
 
 	@Override
-	public int save(Producto producto) {
-		
-		logger.info("Inicia service registra producto");
-		
+	public void save(Producto producto) {
+		logger.info("ProductoServiceImpl: inicia save");
 		productoRepository.save(producto);
-		
-		logger.info("Termina service registra producto");
-		
-		return 0;
-		// TODO [codificar el cuerpo del método]
+		logger.info("ProductoServiceImpl: termina save");
 	}
 
 	@Override
-	public int delete(Producto producto) {
-		return 0;
-		// TODO [codificar el cuerpo del método]
+	public void delete(String id) {
+		logger.info("ProductoServiceImpl: inicia delete");
+		productoRepository.deleteById(id);
+		logger.info("ProductoServiceImpl: termina delete");
 	}
 
 	@Override
-	public Producto getProducto(String nombre) {
-		return null;
-		// TODO [codificar el cuerpo del método]
+	public List<Producto> getProduct(String nombre) {
+		logger.info("ProductoServiceImpl: inicia getProduct");
+		List<Producto> producto = productoRepository.findByNombre(nombre);
+		logger.info("ProductoServiceImpl: termina getProduct");
+		return producto;
+
 	}
 
 	@Override
-	public List<Producto> getProductos() {
-		return null;
-		// TODO [codificar el cuerpo del método]
+	public List<Producto> getAllProducts() {
+		logger.info("ProductoServiceImpl: inicia getAllProduct");
+		List<Producto> productos = productoRepository.findAll();
+		logger.info("ProductoServiceImpl: termina getAllProduct");
+		return productos;
 	}
-	
-	
+
 }
