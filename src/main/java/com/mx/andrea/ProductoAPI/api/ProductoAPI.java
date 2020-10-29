@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import com.mx.andrea.ProductoAPI.exception.ProductoNotFoundException;
 import com.mx.andrea.ProductoAPI.model.Producto;
 import com.mx.andrea.ProductoAPI.service.ProductoService;
 
@@ -66,15 +67,29 @@ public class ProductoAPI {
 	 * @return
 	 */
 	@GetMapping("/obtieneProductos")
-	public List<Producto> getAllProducts() {
+	public ResponseEntity<List<Producto>> getAllProducts() {
 		final long start = System.nanoTime();
 		logger.info("ProductoAPI: inicia getAllProduct");
-		List<Producto> products = productoService.getAllProducts();
-		final long end = System.nanoTime();
-		logger.info("time " + (end - start) / 1000000 + "ms");
-		logger.info("time " + (end - start) / 1000000000 + "s");
-		logger.info("ProductoAPI: termina getAllProduct");
-		return products;
+		try {
+			List<Producto> products = productoService.getAllProducts();
+			if (products.isEmpty()) {
+				throw new ProductoNotFoundException("products " + products);
+			} else {
+				return new ResponseEntity<>(products, HttpStatus.OK);
+			}
+		} catch(ProductoNotFoundException ex) {
+			logger.info("Exception " + ex.getMessage());
+			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+
+		} catch(Exception ex) {
+			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+		} finally {
+			final long end = System.nanoTime();
+			logger.info("time " + (end - start) / 1000000 + "ms");
+			logger.info("time " + (end - start) / 1000000000 + "s");
+			logger.info("ProductoAPI: termina getAllProduct");
+		}
+
 	}
 
 	/**
@@ -84,15 +99,26 @@ public class ProductoAPI {
 	 * @return
 	 */
 	@GetMapping("/obtieneProducto/{nombre}")
-	public List<Producto> getProduct(@PathVariable String nombre) {
+	public ResponseEntity<List<Producto>> getProduct(@PathVariable String nombre) {
 		final long start = System.nanoTime();
 		logger.info("ProductoAPI: inicia getProduct");
-		List<Producto> product = productoService.getProduct(nombre);
-		final long end = System.nanoTime();
-		logger.info("time " + (end - start) / 1000000 + "ms");
-		logger.info("time " + (end - start) / 1000000000 + "s");
-		logger.info("ProductoAPI: termina getProduct");
-		return product;
+		try {
+			List<Producto> product = productoService.getProduct(nombre);
+			if (product.isEmpty()) {
+
+				return new ResponseEntity<>(product, HttpStatus.NO_CONTENT);
+			} else {
+				return new ResponseEntity<>(product, HttpStatus.OK);
+			}
+
+		} catch(Exception e) {
+			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+		} finally {
+			final long end = System.nanoTime();
+			logger.info("time " + (end - start) / 1000000 + "ms");
+			logger.info("time " + (end - start) / 1000000000 + "s");
+			logger.info("ProductoAPI: termina getProduct");
+		}
 	}
 
 	@GetMapping("/obtieneProducto/{id}")
@@ -111,18 +137,27 @@ public class ProductoAPI {
 			logger.info("time " + (end - start) / 1000000 + "ms");
 			logger.info("time " + (end - start) / 1000000000 + "s");
 			logger.info("ProductoAPI: termina obtieneProductoById");
-			return new ResponseEntity<>(null, HttpStatus.OK);// product.get() no se puede trairia
-																												// error
+			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);// product.get() no se puede
+																															// trairia
+			// error, no encontro el recurso diferente a not_count (lista vacia)
 		}
 	}
 
 	@DeleteMapping("/eliminaProducto/{id}")
-	public void deleteProduct(@PathVariable String id) {
+	public ResponseEntity<HttpStatus> deleteProduct(@PathVariable String id) {
 		final long start = System.nanoTime();
 		logger.info("ProductoAPI: inicia deleteProduct");
-		Optional<Producto> product = productoService.getProductById(id);
-		if (product.isPresent()) {
-			productoService.delete(id);
+		try {
+			Optional<Producto> product = productoService.getProductById(id);
+			if (product.isPresent()) {
+				productoService.delete(id);
+				return new ResponseEntity<HttpStatus>(HttpStatus.OK);
+			} else {
+				return new ResponseEntity<HttpStatus>(HttpStatus.NOT_FOUND);
+			}
+		} catch(Exception e) {
+			return new ResponseEntity<HttpStatus>(HttpStatus.INTERNAL_SERVER_ERROR);
+		} finally {
 			final long end = System.nanoTime();
 			logger.info("time " + (end - start) / 1000000 + "ms");
 			logger.info("time " + (end - start) / 1000000000 + "s");
@@ -136,17 +171,27 @@ public class ProductoAPI {
 	 * @author andy lupy29@hotmail.com
 	 */
 	@PutMapping("/actualizaProducto/{id}")
-	public void updateProduct(@PathVariable String id, @RequestBody Producto newProducto) {
+	public ResponseEntity<Producto> updateProduct(@PathVariable String id,
+		@RequestBody Producto newProducto) {
 		final long start = System.nanoTime();
 		logger.info("ProductoAPI: inicia updateProduct");
-		Optional<Producto> product = productoService.getProductById(id);
-		if (product.isPresent()) {
-			productoService.save(newProducto);
+		try {
+			Optional<Producto> product = productoService.getProductById(id);
+			if (product.isPresent()) {
+				productoService.save(newProducto);
+				return new ResponseEntity<Producto>(newProducto, HttpStatus.OK);
+			} else {
+				return new ResponseEntity<Producto>(newProducto, HttpStatus.NOT_FOUND);
+			}
+		} catch(Exception e) {
+			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+		} finally {
 			final long end = System.nanoTime();
 			logger.info("time " + (end - start) / 1000000 + "ms");
 			logger.info("time " + (end - start) / 1000000000 + "s");
 			logger.info("ProductoAPI: finaliza updateProduct");
 		}
+
 	}
 
 }
