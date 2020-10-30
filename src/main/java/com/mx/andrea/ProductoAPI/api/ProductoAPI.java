@@ -66,8 +66,39 @@ public class ProductoAPI {
 	 * @author andy lupy29@hotmail.com
 	 * @return
 	 */
-	@GetMapping("/obtieneProductos")
-	public ResponseEntity<List<Producto>> getAllProducts() {
+	@GetMapping("/obtieneProductosxml")
+	public ResponseEntity<List<Producto>> getAllProductsXml() {
+		final long start = System.nanoTime();
+		logger.info("ProductoAPI: inicia getAllProduct");
+		try {
+			List<Producto> products = productoService.getAllProducts();
+			if (products.isEmpty()) {
+				throw new ProductoNotFoundException("products " + products);
+			} else {
+				return new ResponseEntity<>(products, HttpStatus.OK);
+			}
+		} catch(ProductoNotFoundException ex) {
+			logger.info("Exception " + ex.getMessage());
+			return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+
+		} catch(Exception ex) {
+			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+		} finally {
+			final long end = System.nanoTime();
+			logger.info("time " + (end - start) / 1000000 + "ms");
+			logger.info("time " + (end - start) / 1000000000 + "s");
+			logger.info("ProductoAPI: termina getAllProduct");
+		}
+
+	}
+
+	/**
+	 * TODO [Agregar documentacion al método]
+	 * @author andy lupy29@hotmail.com
+	 * @return
+	 */
+	@GetMapping("/obtieneProductosjson")
+	public ResponseEntity<List<Producto>> getAllProductsJson() {
 		final long start = System.nanoTime();
 		logger.info("ProductoAPI: inicia getAllProduct");
 		try {
