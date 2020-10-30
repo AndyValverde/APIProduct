@@ -79,7 +79,7 @@ public class ProductoAPI {
 			}
 		} catch(ProductoNotFoundException ex) {
 			logger.info("Exception " + ex.getMessage());
-			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
 
 		} catch(Exception ex) {
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -98,7 +98,7 @@ public class ProductoAPI {
 	 * @param name
 	 * @return
 	 */
-	@GetMapping("/obtieneProducto/{nombre}")
+	@GetMapping("/obtieneProductos/{nombre}")
 	public ResponseEntity<List<Producto>> getProduct(@PathVariable String nombre) {
 		final long start = System.nanoTime();
 		logger.info("ProductoAPI: inicia getProduct");
@@ -111,7 +111,7 @@ public class ProductoAPI {
 			}
 
 		} catch(ProductoNotFoundException e) {
-			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
 		} catch(Exception e) {
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		} finally {
@@ -184,13 +184,17 @@ public class ProductoAPI {
 		try {
 			Optional<Producto> product = productoService.getProductById(id);
 			if (product.isPresent()) {
-				productoService.save(newProducto);
-				return new ResponseEntity<Producto>(newProducto, HttpStatus.OK);
+				Producto producto = product.get();// pasa todo el productoy cuando lo regresa a la base
+				producto.setNombre(newProducto.getNombre());
+				producto.setDescripcion(newProducto.getDescripcion());;
+				productoService.save(producto);// por PUTMAPPING y que traen el mismo id mongo entiende
+																				// que estas reescribiendo
+				return new ResponseEntity<Producto>(producto, HttpStatus.OK);
 			} else {
 				throw new ProductoNotFoundException("product " + product);
 			}
 		} catch(ProductoNotFoundException e) {
-			return new ResponseEntity<Producto>(newProducto, HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 		} catch(Exception e) {
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		} finally {

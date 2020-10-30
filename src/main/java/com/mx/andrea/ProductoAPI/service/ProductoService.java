@@ -53,7 +53,7 @@ public interface ProductoService {
 	 */
 	List<Producto> getAllProducts();
 
-	void updateProduct();
+	// void updateProduct();
 
 	Optional<Producto> getProductById(String id);
 

@@ -25,6 +25,6 @@ public interface ProductoRepository extends MongoRepository<Producto, String> {
 
 	List<Producto> findByNombre(String nombre);
 
-	void updateProduct();
+	// void updateProduct();
 
 }

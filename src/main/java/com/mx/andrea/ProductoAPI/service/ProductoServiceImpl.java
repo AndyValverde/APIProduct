@@ -68,11 +68,10 @@ public class ProductoServiceImpl implements ProductoService {
 		logger.info("ProductoServiceImpl: termina getAllProduct");
 		return producto;
 	}
-
-	@Override
-	public void updateProduct() {
-		logger.info("ProductoServiceImpl: inicia updateProduct");
-		productoRepository.updateProduct();
-		logger.info("ProductoServiceImpl: termina updateProduct");
-	}
+	/*
+	 * @Override public void updateProduct() {
+	 * logger.info("ProductoServiceImpl: inicia updateProduct");
+	 * productoRepository.updateProduct();
+	 * logger.info("ProductoServiceImpl: termina updateProduct"); }
+	 */
 }
