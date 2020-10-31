@@ -11,6 +11,8 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -57,6 +59,41 @@ public class ProductoAPI {
 			logger.info("time " + (end - start) / 1000000 + "ms");
 			logger.info("time " + (end - start) / 1000000000 + "s");
 			logger.info("ProductoAPI: termina save");
+		}
+
+	}
+
+	/**
+	 * TODO [Agregar documentacion al método]
+	 * @author andy lupy29@hotmail.com
+	 * @return en servlet
+	 * @GET @Consumes(MediaType.APPLICATION_JSON) @Produces(MediaType.APPLICATION_XML)
+	 */
+
+	@GetMapping(path = "/obtieneProductosxmlfilter/{nombre}", produces = "application/xml",
+		consumes = "application/json") // manda formato(no archivo) xml y recibe formato (no
+																		// archivo) json
+	public ResponseEntity<List<Producto>> getAllProductsXmlFilter(@PathVariable String nombre) {
+		final long start = System.nanoTime();
+		logger.info("ProductoAPI: inicia getAllProduct");
+		try {
+			List<Producto> products = productoService.getAllProductsFilter(nombre);
+			if (products.isEmpty()) {
+				throw new ProductoNotFoundException("products " + products);
+			} else {
+				return new ResponseEntity<>(products, HttpStatus.OK);
+			}
+		} catch(ProductoNotFoundException ex) {
+			logger.info("Exception " + ex.getMessage());
+			return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+
+		} catch(Exception ex) {
+			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+		} finally {
+			final long end = System.nanoTime();
+			logger.info("time " + (end - start) / 1000000 + "ms");
+			logger.info("time " + (end - start) / 1000000000 + "s");
+			logger.info("ProductoAPI: termina getAllProduct");
 		}
 
 	}
@@ -161,6 +198,51 @@ public class ProductoAPI {
 		try {
 			if (product.isPresent()) {
 				return new ResponseEntity<>(product.get(), HttpStatus.OK);
+			} else {
+				throw new ProductoNotFoundException("product " + product);
+			}
+		} catch(ProductoNotFoundException e) {
+			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);// product.get() no se puede
+			// trairia
+			// error, no encontro el recurso diferente a not_count (lista vacia)
+		} catch(Exception e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		} finally {
+			final long end = System.nanoTime();
+			logger.info("time " + (end - start) / 1000000 + "ms");
+			logger.info("time " + (end - start) / 1000000000 + "s");
+			logger.info("ProductoAPI: termina obtieneProductoById");
+		}
+	}
+
+	@GetMapping("/obtieneProductoHATEOAS/{id}")
+	public ResponseEntity<EntityModel<Optional<Producto>>> obtieneProductoByIdHATEOAS(
+		@PathVariable("id") String id) {
+		final long start = System.nanoTime();
+		logger.info("ProductoAPI: inicia obtieneProductoById");
+		try {
+			Optional<Producto> product = productoService.getProductById(id);
+			if (product.isPresent()) {
+				// creacion de un modelo entitymodel es igual a mi modelo solo cambia el tipo
+				EntityModel<Optional<Producto>> resource = EntityModel.of(product);
+				// construye instancia del link que apunta al metodo del controller que se indica
+				WebMvcLinkBuilder linkToJson = WebMvcLinkBuilder
+					.linkTo(WebMvcLinkBuilder.methodOn(this.getClass()).getAllProductsJson());
+				// le agrega el link y le pone un sobre nombre(withRel es sobrenombre)
+				resource.add(linkToJson.withRel("all-product-json"));
+				/**
+				 * Esto no se podría por que se debe crear nueva variable para el nuevo link
+				 */
+				/**
+				 * linkToJson = WebMvcLinkBuilder
+				 * .linkTo(WebMvcLinkBuilder.methodOn(this.getClass()).getAllProductsXml());
+				 * resource.add(linkToJson.withRel("all-product-xml"));
+				 **/
+				WebMvcLinkBuilder linkToXml = WebMvcLinkBuilder
+					.linkTo(WebMvcLinkBuilder.methodOn(this.getClass()).getAllProductsXml());
+				resource.add(linkToXml.withRel("all-product-xml"));
+
+				return new ResponseEntity<>(resource, HttpStatus.OK);
 			} else {
 				throw new ProductoNotFoundException("product " + product);
 			}

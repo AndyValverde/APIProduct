@@ -8,6 +8,7 @@ package com.mx.andrea.ProductoAPI.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +60,19 @@ public class ProductoServiceImpl implements ProductoService {
 		List<Producto> productos = productoRepository.findAll();
 		logger.info("ProductoServiceImpl: termina getAllProduct");
 		return productos;
+	}
+
+	public List<Producto> getAllProductsFilter(String filtro) {
+		logger.info("ProductoServiceImpl: inicia getAllProduct");
+		List<Producto> productos = productoRepository.findAll();// Si la base estuviera vacia solo
+																														// mandaria vacia no null entonces
+																														// tenemos validado en el API
+		List<Producto> fiterProdutos = productos.stream()// trata como un flujo de datos a
+																											// productos
+			.filter(product -> filtro.equals(product.getNombre()))// filtrar el flujo por sentencia
+			.collect(Collectors.toList());// vuelve el strem a una coleccion de datos
+		logger.info("ProductoServiceImpl: termina getAllProduct");
+		return fiterProdutos;
 	}
 
 	@Override

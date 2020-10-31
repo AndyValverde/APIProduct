@@ -57,4 +57,6 @@ public interface ProductoService {
 
 	Optional<Producto> getProductById(String id);
 
+	List<Producto> getAllProductsFilter(String filtro);
+
 }
